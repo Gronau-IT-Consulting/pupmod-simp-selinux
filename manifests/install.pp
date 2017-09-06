@@ -3,10 +3,21 @@
 class selinux::install {
   assert_private()
 
-  $utils_packages = [
-    'checkpolicy',
-    'policycoreutils-python',
-  ]
+  if $facts['os']['name'] in ['RedHat','CentOS'] {
+    $utils_packages = [
+      'checkpolicy',
+      'policycoreutils-python'
+    ]
+  }
+  elsif $facts['os']['name'] in ['Debian','Ubuntu'] {
+    $utils_packages = [
+      'checkpolicy',
+      'policycoreutils'
+    ]
+  }
+  else {
+    fail("OS '${facts['os']['name']}' not supported by '${module_name}'")
+  }
 
   if $::selinux::manage_utils_package {
     ensure_resource('package', $utils_packages, { 'ensure' => $::selinux::package_ensure })
